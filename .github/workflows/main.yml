@@ -1,0 +1,39 @@
+name: Android CI  # 工作流名称
+
+on: [push]  # 触发条件：每次代码推送时运行
+
+jobs:  # 定义工作任务
+  build:  # 工作ID
+    runs-on: ubuntu-latest  # 使用最新版Ubuntu系统
+    
+    steps:  # 定义执行步骤
+    # 第一步：获取仓库代码
+    - name: Checkout code
+      uses: actions/checkout@v3  # 使用官方代码检出工具
+    
+    # 第二步：解压项目文件
+    - name: Unzip Project
+      run: |  # 执行多行命令
+        unzip VideoApp.zip -d .  # 解压到当前目录
+        rm VideoApp.zip  # 删除压缩包
+        
+    # 第三步：安装Java开发环境
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'  # 使用Java 11
+        distribution: 'adopt'  # 使用AdoptOpenJDK
+    
+    # 第四步：构建APK
+    - name: Build APK
+      run: |  # 执行多行命令
+        cd VideoApp  # 进入项目目录
+        chmod +x gradlew  # 添加执行权限（重要！）
+        ./gradlew assembleDebug  # 执行Gradle构建命令
+    
+    # 第五步：上传生成的APK
+    - name: Upload APK
+      uses: actions/upload-artifact@v3  # 使用官方上传工具
+      with:
+        name: app-debug  # 文件名称
+        path: VideoApp/app/build/outputs/apk/debug/app-debug.apk  # APK文件路径
